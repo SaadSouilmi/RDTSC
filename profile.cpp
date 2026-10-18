@@ -1,26 +1,45 @@
+#if defined(__i386__) || defined(__x86_64__)
 #include <x86intrin.h>
+#elif defined(__aarch64__)
+#include <arm_acle.h>
+#endif
 #include <math.h>
+#include <stdio.h>
 #include <time.h>
 
 internal U64
 ReadTSC()
 {
+#if defined(__i386__) || defined(__x86_64__)
 	U32 Aux;
 	return __rdtscp(&Aux);
+#elif defined(__aarch64__)
+	// Keep the counter read ordered with the measured work.
+	__isb(15);
+	U64 Ticks = __arm_rsr64("cntvct_el0");
+	__isb(15);
+	return Ticks;
+#else
+#error "Unsupported profiler architecture"
+#endif
 }
 
 internal U64
 ReadOSTime()
 {
 	struct timespec T;
+#if defined(CLOCK_MONOTONIC_RAW)
 	clock_gettime(CLOCK_MONOTONIC_RAW, &T);
+#else
+	clock_gettime(CLOCK_MONOTONIC, &T);
+#endif
 	return (U64)T.tv_sec * 1000000000ULL + (U64)T.tv_nsec;
 }
 
 internal tsc_calibration
 GetTSCCalibration()
 {
-	local_persist tsc_calibration Calibration = {0};
+	local_persist tsc_calibration Calibration = {0, 0};
 
 	if (Calibration.TSCTicks != 0.0) { return Calibration; }
 

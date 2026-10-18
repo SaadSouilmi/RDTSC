@@ -40,6 +40,7 @@ typedef struct profile_stats {
     U64 MaxTicks;
 } profile_stats;
 
+// Timer ticks, not CPU cycles.
 internal U64 ReadTSC();
 internal U64 ReadOSTime();
 internal tsc_calibration GetTSCCalibration();
