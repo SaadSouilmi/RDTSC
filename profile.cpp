@@ -12,7 +12,9 @@ ReadTSC()
 {
 #if defined(__i386__) || defined(__x86_64__)
 	U32 Aux;
-	return __rdtscp(&Aux);
+	U64 Ticks = __rdtscp(&Aux);
+	_mm_lfence();
+	return Ticks;
 #elif defined(__aarch64__)
 	// Keep the counter read ordered with the measured work.
 	__isb(15);

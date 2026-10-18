@@ -6,7 +6,9 @@ internal U64
 ReadTSC()
 {
 	U32 Aux;
-	return __rdtscp(&Aux);
+	U64 Ticks = __rdtscp(&Aux);
+	_mm_lfence();
+	return Ticks;
 }
 
 internal U64
