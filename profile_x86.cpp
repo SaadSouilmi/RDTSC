@@ -71,6 +71,32 @@ TSCToWall(U64 ElapsedTicks, time_unit Unit)
 	return -1;
 }
 
+
+internal void
+IncrementStats(profile_stats *Stats, U64 Elapsed)
+{
+	Stats->Count++;
+	F64 Delta = (F64)Elapsed - Stats->AvgTicks;
+	Stats->AvgTicks += Delta / (F64)Stats->Count;
+
+	F64 Delta2 = (F64)Elapsed - Stats->AvgTicks;
+	Stats->M2Ticks += Delta * Delta2;
+
+	if (Stats->Count > 1)
+	{
+		Stats->StdTicks = sqrt(Stats->M2Ticks / (F64)(Stats->Count - 1));
+		Stats->MinTicks = Min(Stats->MinTicks, Elapsed);
+		Stats->MaxTicks = Max(Stats->MaxTicks, Elapsed);
+	}
+	else
+	{
+		Stats->MinTicks = Elapsed;
+		Stats->MaxTicks = Elapsed;
+	}
+
+};
+
+
 #define TimeFunctionN(ProfileStats, NIterations, Call, Print, Unit)   \
     do                                                               \
     {                                                                \

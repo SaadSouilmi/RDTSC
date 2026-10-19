@@ -45,6 +45,8 @@ internal U64 ReadTSC();
 internal U64 ReadOSTime();
 internal tsc_calibration GetTSCCalibration();
 internal F64 TSCToWall(U64 ElapsedTicks, time_unit Unit);
+internal void IncrementStats(profile_stats *Stats, U64 Elapsed);
+
 
 #endif // PROFILE_H
 
